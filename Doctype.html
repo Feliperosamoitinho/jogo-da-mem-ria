@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo da Memória de Cores</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(2, 150px);
+      grid-gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .color-button {
+      width: 150px;
+      height: 150px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .color-button:active {
+      transform: scale(0.95);
+    }
+
+    #score {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    #start-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    .credits {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+
+    .credits span {
+      display: block;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    @media (max-width: 500px) {
+      #game-board {
+        grid-template-columns: repeat(2, 100px);
+        grid-gap: 15px;
+      }
+
+      .color-button {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Jogo da Memória de Cores</h1>
+  <div id="game-board">
+    <button class="color-button" id="red" style="background-color: red;"></button>
+    <button class="color-button" id="green" style="background-color: green;"></button>
+    <button class="color-button" id="blue" style="background-color: blue;"></button>
+    <button class="color-button" id="yellow" style="background-color: yellow;"></button>
+  </div>
+  <button id="start-btn">Começar</button>
+  <div id="score"></div>
+
+  <div class="credits">
+    <p>Desenvolvido por:</p>
+    <span>Vitor Henrique Rodrigues Barros - 242032040</span>
+    <span>Felipe Rosa Moitinho - 242022713</span>
+  </div>
+
+  <script>
+    const colors = ['red', 'green', 'blue', 'yellow'];
+    let sequence = [];
+    let playerSequence = [];
+    let score = 0;
+    const scoreDisplay = document.getElementById('score');
+    const startBtn = document.getElementById('start-btn');
+
+    function playSound(color) {
+      const audio = new Audio(`https://s3.amazonaws.com/freecodecamp/simonSound${colors.indexOf(color)+1}.mp3`);
+      audio.play();
+    }
+
+    function flashColor(color) {
+      const button = document.getElementById(color);
+      button.style.opacity = '0.5';
+      playSound(color);
+      setTimeout(() => {
+        button.style.opacity = '1';
+      }, 300);
+    }
+
+    function showSequence() {
+      sequence.forEach((color, index) => {
+        setTimeout(() => flashColor(color), 600 * index);
+      });
+    }
+
+    function nextRound() {
+      const nextColor = colors[Math.floor(Math.random() * colors.length)];
+      sequence.push(nextColor);
+      playerSequence = [];
+      showSequence();
+    }
+
+    function handleUserInput(color) {
+      playSound(color);
+      playerSequence.push(color);
+      const currentIndex = playerSequence.length - 1;
+      if (playerSequence[currentIndex] !== sequence[currentIndex]) {
+        endGame();
+      } else if (playerSequence.length === sequence.length) {
+        score++;
+        scoreDisplay.textContent = `Pontuação: ${score}`;
+        setTimeout(nextRound, 1000);
+      }
+    }
+
+    function endGame() {
+      alert(`Fim de jogo! Sua pontuação foi: ${score}`);
+      sequence = [];
+      playerSequence = [];
+      score = 0;
+      scoreDisplay.textContent = '';
+    }
+
+    colors.forEach(color => {
+      document.getElementById(color).addEventListener('click', () => handleUserInput(color));
+    });
+
+    startBtn.addEventListener('click', () => {
+      score = 0;
+      scoreDisplay.textContent = 'Pontuação: 0';
+      sequence = [];
+      playerSequence = [];
+      nextRound();
+    });
+  </script>
+</body>
+</html>
